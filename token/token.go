@@ -43,4 +43,10 @@ const (
 	// 1343456
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	BANG     = "BANG"
+	MINUS    = "-"
+	SLASH    = "/"
+	ASTERISK = "*"
+	LT       = "<"
+	GT       = ">"
 )
