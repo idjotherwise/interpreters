@@ -36,6 +36,7 @@ const (
 	ASSIGN   = "="
 	PLUS     = "+"
 	MINUS    = "-"
+	BANG     = "!"
 	SLASH    = "/"
 	ASTERISK = "*"
 	LT       = "<"
@@ -54,7 +55,6 @@ const (
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
-	BANG     = "BANG"
 	IF       = "IF"
 	RETURN   = "RETURN"
 	TRUE     = "TRUE"
