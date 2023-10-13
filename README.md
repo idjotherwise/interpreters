@@ -12,8 +12,10 @@ monorepo of monkeylang implementations that I'm working on
 - Julia
 	- [] Intepreter
 		- [x] Lexer
-		- [] AST
-		- [] Eval
+		- [x] AST
+		- [x] Eval
+		- [x] REPL
+		- [] ???
 
 Also contains some monkeylang code snipets, such as doing a `sum` using a `reduce` function:
 
