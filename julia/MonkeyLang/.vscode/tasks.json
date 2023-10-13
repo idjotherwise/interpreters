@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+
+  "tasks": [
+    {
+      "label": "echo",
+      "type": "shell",
+      "command": "echo ${workspaceFolderBasename}",
+    },
+    {
+      "label": "new julia module and test",
+
+      "command": "mkdir -p 'src/${input:moduleName}' && echo 'module ${input:moduleName}Module\n\nend' >> 'src/${input:moduleName}/${input:moduleName}Module.jl' && echo 'using Test\n\n@testset \"Is it true\" begin\n\t@test true\nend' >> 'test/${input:moduleName}.jl' && sed -i 's/SOURCES = \\[/SOURCES = [\\n\\t\"${input:moduleName}\\/${input:moduleName}Module.jl\",/g' src/${workspaceFolderBasename}.jl && sed -i 's/TEST_FILES = \\[/TEST_FILES = [\\n\\t\"${input:moduleName}.jl\",/g' test/runtests.jl",
+
+      "type": "shell",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+   }
+],  
+
+// ........................................................................................
+  
+  "inputs": [
+
+    {
+      "type": "promptString",
+      "id": "moduleName",
+      "description": "Complete my folder name",
+      "default": "Julia module to create"
+    }
+  ]
+}
