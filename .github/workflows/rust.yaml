@@ -2,13 +2,12 @@ name: rust package
 
 on: [push]
 
-defaults:
-  run:
-    working-directory: ./rust
-
 jobs:
   check:
     name: Check
+    defaults:
+      run:
+        working-directory: ./rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,6 +26,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./rust
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
