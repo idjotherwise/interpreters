@@ -3,10 +3,10 @@ name: Go package
 on: [push]
 
 jobs:
-  defaults:
-    run:
-      working-directory: ./go
   build:
+    defaults:
+      run:
+        working-directory: ./go
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
