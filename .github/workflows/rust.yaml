@@ -2,10 +2,11 @@ name: rust package
 
 on: [push]
 
+defaults:
+  run:
+    working-directory: ./rust
+
 jobs:
-  defaults:
-    run:
-      working-directory: ./rust
   check:
     name: Check
     runs-on: ubuntu-latest
