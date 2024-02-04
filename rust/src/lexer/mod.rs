@@ -32,8 +32,9 @@ impl Scanner {
 #[cfg(test)]
 mod tests {
     use crate::lexer::Scanner;
+    use crate::token::{Token, TokenType};
 
-    const TEST_SOURCE: &str = "This is some input";
+    const TEST_SOURCE: &str = "var x = 1";
     #[test]
     fn can_construct_scanner() {
         let scanner = Scanner::new(TEST_SOURCE);
@@ -43,6 +44,12 @@ mod tests {
     fn can_scan_tokens() {
         let scanner = Scanner::new(TEST_SOURCE);
         let tokens = scanner.scan_tokens();
-        assert_eq!(tokens[1].literal, "is");
+        let expected_tokens = vec![
+            Token::new(TokenType::Var, "var", 1),
+            Token::new(TokenType::Identifier, "x", 1),
+            Token::new(TokenType::Equal, "=", 1),
+            Token::new(TokenType::Number, "1", 1),
+        ];
+        assert_eq!(tokens, expected_tokens);
     }
 }

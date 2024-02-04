@@ -44,7 +44,7 @@ pub enum TokenType {
     BangEqual,
 
     Function,
-    Let,
+    Var,
     True,
     False,
     If,
@@ -72,7 +72,7 @@ impl From<TokenType> for &'static str {
             TokenType::Equal => "EQUAL ",
             TokenType::BangEqual => "BANGEQUAL ",
             TokenType::Function => "FUNCTION ",
-            TokenType::Let => "LET ",
+            TokenType::Var => "VAR ",
             TokenType::True => "TRUE ",
             TokenType::False => "FALSE ",
             TokenType::If => "IF ",
