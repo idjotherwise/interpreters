@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub struct Token {
     pub ttype: TokenType,
     pub literal: String,
