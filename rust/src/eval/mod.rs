@@ -8,13 +8,15 @@ pub fn evaluate_file(f: &PathBuf) {
 }
 
 pub fn run(source: &str) {
-    let scanner = Scanner::new(source);
-    let tokens = scanner.scan_tokens();
+    let scanner = &mut Scanner::default();
+    let tokens = scanner.scan_tokens(source.to_string());
 
-    for token in tokens {
+    for token in tokens.unwrap() {
         println!(
             "[{}, {}, (line: {})]",
-            token.literal, token.ttype, token.line
-        )
+            std::str::from_utf8(&token.lexeme).unwrap(),
+            token.ttype,
+            token.line
+        );
     }
 }
