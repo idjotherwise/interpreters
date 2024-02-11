@@ -166,6 +166,8 @@ impl Scanner {
         let text = self.source[self.start as usize..self.current as usize].to_vec();
         let token_type = match text.as_slice() {
             b"var" => TokenType::Var,
+            b"fn" => TokenType::Fn,
+            b"return" => TokenType::Return,
             _ => TokenType::Identifier,
         };
         self.add_token(token_type)
@@ -198,6 +200,32 @@ mod tests {
                 "1".as_bytes().to_vec(),
                 Some(Literal::Number(1.0)),
             ),
+            Token::new(TokenType::Eof, "EOF".as_bytes().to_vec(), None),
+        ];
+        assert_eq!(tokens.unwrap(), expected_tokens);
+    }
+
+    #[test]
+    fn can_identify_functions() {
+        const FUNCTION_SOURCE: &str = "fn double(x) { return 2x }";
+        let scanner = &mut Scanner::default();
+        let tokens = scanner.scan_tokens(FUNCTION_SOURCE.to_string());
+
+        let expected_tokens = vec![
+            Token::new(TokenType::Fn, "fn".as_bytes().to_vec(), None),
+            Token::new(TokenType::Identifier, "double".as_bytes().to_vec(), None),
+            Token::new(TokenType::LeftParen, "(".as_bytes().to_vec(), None),
+            Token::new(TokenType::Identifier, "x".as_bytes().to_vec(), None),
+            Token::new(TokenType::RightParen, ")".as_bytes().to_vec(), None),
+            Token::new(TokenType::LeftBrace, "{".as_bytes().to_vec(), None),
+            Token::new(TokenType::Return, "return".as_bytes().to_vec(), None),
+            Token::new(
+                TokenType::Number,
+                "2".as_bytes().to_vec(),
+                Some(Literal::Number(2.)),
+            ),
+            Token::new(TokenType::Identifier, "x".as_bytes().to_vec(), None),
+            Token::new(TokenType::RightBrace, "}".as_bytes().to_vec(), None),
             Token::new(TokenType::Eof, "EOF".as_bytes().to_vec(), None),
         ];
         assert_eq!(tokens.unwrap(), expected_tokens);
