@@ -9,6 +9,7 @@ struct Cli {
 }
 
 fn main() {
+    env_logger::init();
     let file = Cli::parse();
     match file.path {
         None => repl::start_repl(),

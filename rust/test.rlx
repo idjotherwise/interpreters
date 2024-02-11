@@ -1,0 +1,5 @@
+var x = 1;
+
+fn add(a;;Number, b;;Number) {
+	a + b
+}

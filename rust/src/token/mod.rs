@@ -12,15 +12,13 @@ pub struct Token {
     pub ttype: TokenType,
     pub lexeme: Vec<u8>,
     pub literal: Option<Literal>,
-    pub line: usize,
 }
 impl Token {
-    pub fn new(ttype: TokenType, lexeme: Vec<u8>, literal: Option<Literal>, line: usize) -> Self {
+    pub fn new(ttype: TokenType, lexeme: Vec<u8>, literal: Option<Literal>) -> Self {
         Self {
             ttype,
             lexeme,
             literal,
-            line,
         }
     }
 }
