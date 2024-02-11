@@ -2,7 +2,7 @@ use crate::token::{Literal, Token, TokenType};
 // disable the dead code warning
 #[allow(dead_code)]
 #[derive(Debug)]
-pub struct Error {
+pub struct ScannerError {
     message: String,
     line: usize,
     column: usize,
@@ -11,11 +11,11 @@ pub struct Error {
 pub struct Scanner {
     source: Vec<u8>,
     tokens: Vec<Token>,
-    err: Option<Error>,
+    err: Option<ScannerError>,
     start: u32,
     current: u32,
     line: usize,
-    // column: i64,
+    column: usize,
 }
 impl Default for Scanner {
     fn default() -> Self {
@@ -26,17 +26,17 @@ impl Default for Scanner {
             start: 0,
             current: 0,
             line: 0,
-            // column: -1,
+            column: 0,
         }
     }
 }
 
 impl Scanner {
     fn is_end(&self) -> bool {
-        (self.current as usize) >= self.source.len()
+        (self.current as usize) > self.source.len()
     }
 
-    pub fn scan_tokens(&mut self, input: String) -> Result<Vec<Token>, Error> {
+    pub fn scan_tokens(&mut self, input: String) -> Result<Vec<Token>, ScannerError> {
         self.source = input.as_bytes().to_vec();
         let _tokens: Vec<Token> = vec![];
         while !self.is_end() || self.err.is_none() {
@@ -55,6 +55,9 @@ impl Scanner {
         }
     }
     pub fn scan_token(&mut self) {
+        if (self.current + 1) as usize >= self.source.len() {
+            return;
+        }
         let c = self.advance();
         match c as char {
             '(' => self.add_token(TokenType::LeftParen),
@@ -72,6 +75,12 @@ impl Scanner {
                     self.number();
                 } else if c.is_ascii_alphabetic() {
                     self.identifier();
+                } else {
+                    ScannerError {
+                        message: "Unexpected character.".to_string(),
+                        line: self.line,
+                        column: self.column,
+                    };
                 }
             }
         }
@@ -79,6 +88,7 @@ impl Scanner {
 
     fn advance(&mut self) -> u8 {
         self.current += 1;
+
         let c = self.source[self.current as usize];
         c
     }
