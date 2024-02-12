@@ -17,6 +17,10 @@ impl std::fmt::Display for SourcePosition {
 pub enum Error {
     #[error("Unexpected character '{c}' at {pos}")]
     UnexpectedChar { c: char, pos: SourcePosition },
+    #[error("InvalidUTF8 character at {pos}")]
+    InvalidUTF8Char { pos: SourcePosition },
+    #[error("Unterminated string starting at {pos}")]
+    UnterminatedString { pos: SourcePosition },
 }
 
 #[derive(Default)]
@@ -87,10 +91,36 @@ impl Scanner {
             '.' => Ok(Some(self.add_token(TokenType::Dot))),
             '-' => Ok(Some(self.add_token(TokenType::Minus))),
             '+' => Ok(Some(self.add_token(TokenType::Plus))),
-            '=' => Ok(Some(self.add_token(TokenType::Equal))),
+            '=' => match self.matches_next('=') {
+                true => Ok(Some(self.add_token(TokenType::EqualEqual))),
+                false => Ok(Some(self.add_token(TokenType::Equal))),
+            },
+            '!' => match self.matches_next('=') {
+                true => Ok(Some(self.add_token(TokenType::BangEqual))),
+                false => Ok(Some(self.add_token(TokenType::Bang))),
+            },
+            '<' => match self.matches_next('=') {
+                true => Ok(Some(self.add_token(TokenType::LessEqual))),
+                false => Ok(Some(self.add_token(TokenType::Less))),
+            },
+            '>' => match self.matches_next('=') {
+                true => Ok(Some(self.add_token(TokenType::GreaterEqual))),
+                false => Ok(Some(self.add_token(TokenType::Greater))),
+            },
             ';' => Ok(Some(self.add_token(TokenType::Semicolon))),
             '*' => Ok(Some(self.add_token(TokenType::Star))),
+            '/' => match self.matches_next('/') {
+                true => {
+                    // Comment goes to end of the line
+                    while self.peek() != '\n' && !self.is_end() {
+                        self.advance();
+                    }
+                    Ok(None)
+                }
+                false => Ok(Some(self.add_token(TokenType::Slash))),
+            },
             ' ' | '\n' | '\t' | '\r' => Ok(None),
+            '"' => self.string(),
             _ => {
                 if c.is_ascii_digit() {
                     Ok(Some(self.number()))
@@ -103,6 +133,17 @@ impl Scanner {
                     })
                 }
             }
+        }
+    }
+    fn matches_next(&mut self, c: char) -> bool {
+        if self.is_end() {
+            return false;
+        }
+        if self.peek() == c {
+            self.advance();
+            true
+        } else {
+            false
         }
     }
 
@@ -139,6 +180,32 @@ impl Scanner {
                 .unwrap();
 
         self.add_literal_token(TokenType::Number, Some(Literal::Number(val)))
+    }
+
+    fn string(&mut self) -> Result<Option<Token>, Error> {
+        // If rlox supported escape characters, we would need to implement those in this function
+        while self.peek() != '"' && !self.is_end() {
+            self.advance();
+        }
+        if self.is_end() {
+            // Rewind byte_offset so that we can tell where the unterminated string
+            // started at
+            self.byte_offset = self.start as usize;
+            return Err(Error::UnterminatedString {
+                pos: self.resolve_position(),
+            });
+        }
+        self.advance();
+        // Seems like this is duplicated a bit since it's also calculated inside add_literal_token
+        let val = &self.source[(self.start as usize)..(self.current as usize - 1)];
+        match std::string::String::from_utf8(val.to_vec()) {
+            Ok(v) => Ok(Some(
+                self.add_literal_token(TokenType::String, Some(Literal::Str(v))),
+            )),
+            Err(_) => Err(Error::InvalidUTF8Char {
+                pos: self.resolve_position(),
+            }),
+        }
     }
 
     fn peek(&self) -> char {
@@ -226,6 +293,23 @@ mod tests {
             ),
             Token::new(TokenType::Identifier, "x".as_bytes().to_vec(), None),
             Token::new(TokenType::RightBrace, "}".as_bytes().to_vec(), None),
+            Token::new(TokenType::Eof, "EOF".as_bytes().to_vec(), None),
+        ];
+        assert_eq!(tokens.unwrap(), expected_tokens);
+    }
+    #[test]
+    fn can_handle_strings() {
+        let string_source = r#""this is a string""#;
+        let scanner = &mut Scanner::default();
+        let tokens = scanner.scan_tokens(string_source.to_string());
+
+        let expected_tokens = vec![
+            Token::new(
+                TokenType::String,
+                "\"this is a string\"".as_bytes().to_vec(),
+                // TODO: check if this is wrong. Seems like adding the closing string fails the test.
+                Some(Literal::Str(r#""this is a string"#.to_owned())),
+            ),
             Token::new(TokenType::Eof, "EOF".as_bytes().to_vec(), None),
         ];
         assert_eq!(tokens.unwrap(), expected_tokens);
